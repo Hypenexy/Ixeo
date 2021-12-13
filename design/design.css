@@ -1,0 +1,124 @@
+
+
+        * {
+            font-family: 'Roboto', sans-serif
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px
+        }
+
+        body {
+            margin: 0;
+            margin-top: 25vh;
+            text-align: center;
+            height: 105vh;
+            -ms-overflow-style: none;
+            scrollbar-width: none
+        }
+
+        a,
+        p {
+            font-size: 84px;
+            font-weight: 400;
+            background: linear-gradient(117deg, #65baff 0%, #d0bbff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        input {
+            width: 370px
+        }
+
+        input,
+        button {
+            border: 1px solid #bbb;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 99px 0 0 99px;
+            outline: 0
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 300;
+            border-radius: 0 99px 99px 0
+        }
+
+        input:focus,
+        button:focus {
+            border: 1px solid #666
+        }
+        
+    ::-webkit-scrollbar {
+        display: block
+    }
+
+    body {
+        -ms-overflow-style: initial;
+        scrollbar-width: initial;
+    }
+
+    ::-webkit-scrollbar {
+        width: 12px
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        background: #bbb
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #999
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+        background: #777
+    }
+
+    #lo h1 {
+        font-weight: 300;
+        color: #a67fff
+    }
+
+
+        #lo {
+            height: 100%;
+            box-sizing: border-box;
+            margin-top: 20%;
+            background: #f9f9f9;
+            border-top: 1px solid #bbb;
+            width: 100%;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+    #firstrow, #secondrow{
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 50px;
+    }
+    #firstrow h1, #secondrow h1{
+        color:#65baff
+    }
+    #firstrow h2, #secondrow h2{
+        margin-bottom: 5px;
+    }
+
+    #secondrow textarea{
+        background: none;
+    }
+
+    @media only screen and (max-width: 800px) {
+        #firstrow, #secondrow{
+            display: block;
+        }
+        #firstrow div, #secondrow div{
+            margin-bottom: 16px; 
+            padding: 12px;
+            padding-bottom: 30px;
+            border-radius: 8px;
+            background: #77777711;
+        }
+    }
