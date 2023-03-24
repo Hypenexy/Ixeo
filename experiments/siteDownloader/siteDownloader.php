@@ -28,6 +28,11 @@ function saveAsset($url, $src, $folder){
     echo "<br>";
 }
 
+function getLinksInStyle($text){
+    preg_match_all("/(?<=url\()(.*)(?=\))/i", $text, $matches);
+    return $matches;
+}
+
 function downloadWebsite($url){
     $index = downloadFile($url);
     $urlFolder = str_replace(':', '', $url);
@@ -50,16 +55,25 @@ function downloadWebsite($url){
     foreach ($styles as $style){
         if($style->getAttribute('rel')=="stylesheet"){
             $src = $style->getAttribute('href');
-            saveAsset($url, $src, $folder);
+            // /(?<=url\()(.*)(?=\))/gi
+            $assetURL = "$url/$src";
+            print_r(getLinksInStyle(downloadFile($assetURL)));
+            if($src!=""){
+                saveAsset($url, $src, $folder);
+            }
         }
     }
     foreach ($images as $image){
         $src = $image->getAttribute('src');
-        saveAsset($url, $src, $folder);
+        if($src!=""){
+            saveAsset($url, $src, $folder);
+        }
     }
     foreach ($scripts as $script){
         $src = $script->getAttribute('src');
-        saveAsset($url, $src, $folder);
+        if($src!=""){
+            saveAsset($url, $src, $folder);
+        }
     }
 }
 
