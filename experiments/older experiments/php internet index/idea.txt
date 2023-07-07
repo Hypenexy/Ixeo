@@ -1,0 +1,3 @@
+have a different mysql database for each letter of alphabet.
+will be way faster! but wait it will only support english... ;(
+idk man

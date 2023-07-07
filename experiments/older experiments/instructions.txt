@@ -1,0 +1,13 @@
+table should look like:
+
+url | links
+
+1. open wikipedia.org
+2. get every link
+3. open every link
+4. get every link
+5. repeat 3-5
+
+6. get data = site, heading, title, text and image
+
+url | title | alttitle | image | text content | website

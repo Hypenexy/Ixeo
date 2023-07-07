@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midelight</title>
+    <link rel="stylesheet" href="img/styles/home.css">
+
+	<meta name="title" content="Midelight">
+	<meta name="description" content="I create Web Applications and Services">
+	<meta name="author" content="Hypenexy">
+	<meta name="creator" content="Hypenexy">
+	<meta name="keywords" content="midelight, hypenexy, project">
+
+	<meta property="og:title" content="Midelight">
+	<meta property="og:description" content="I create Web Applications and Services">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://midelight.net">
+
+	<meta property="og:image" content="favicon.ico">
+	<meta property="og:image:alt" content="favicon.ico">
+	<meta property="og:image:secure_url" content="https://midelight.net/favicon.ico">
+	<!-- <meta property="og:image:type" content="image/png">
+	<meta property="og:image:width" content="80"> -->
+</head>
+<body>
+    <div class="welcome">
+        <div class="logo">
+            <img height="256px" style="vertical-align: middle;" src="mide.png"><a style="vertical-align: middle;">Midelight</a>
+        </div>
+    </div>
+
+    <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#65baff" fill-opacity="1" d="M0,288L48,277.3C96,267,192,245,288,218.7C384,192,480,160,576,133.3C672,107,768,85,864,85.3C960,85,1056,107,1152,106.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg> -->
+
+    <div class="header">
+        <a href="#orpheux">Projects</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </div>
+
+    <div class="panel">
+        <img width="100%" src="img/navs/nav.png">
+        <!-- Maybe animate the nav? Make it wavey! -->
+        <div id="orpheux">
+            <div class="mdblock">
+                <div class="info">
+                    <h1>Orpheux</h1>
+                    <h2>Developing the software thats</h2>
+                    <h2>• Allowing you to listen to music in a different way</h2>
+                    <!-- <h2>• Helping people speak</h2> -->
+                    <!-- <h2>• Making you enjoy music</h2> -->
+                    <!-- <h2>Follow & Help my development</h2> -->
+                    <a target="_blank" href="https://github.com/Hypenexy/Orpheux"><button>GitHub</button></a>
+                    <a href="https://orpheux.midelight.net/"><button>Open Beta</button></a>
+                </div>
+                <iframe src="Orpheux/preview/"></iframe>
+            </div> 
+        </div>
+    </div>
+    <div class="panel">
+        <img style="background: #65baff" width="100%" src="img/navs/wnnav.png">
+        <div id="writenote">
+            <div class="mdblock">
+                <div class="info">
+                    <h1>WriteNote</h1>
+                    <h2>The easiest way to write, <br>share, edit photos, save notes!</h2>
+                    <a href="WriteNote"><button>View Product page</button></a> <a href="https://writenote.midelight.net"><button>Open WriteNote</button></a>
+                </div>
+                <iframe src="WriteNoteApp/preview"></iframe>
+            </div>
+        </div>
+    </div>
+    <div id="about" class="panel about">
+        <div class="mdblock">
+            <div class="aboutsection">
+                <h3>About Hypenexy</h3>
+                <p>I am a programmer, graphic designer, game developer, cool friend and the sole developer of Midelight.</p>
+            </div>
+            <div class="aboutsection">
+                <h3>About Midelight</h3>
+                <p>Midelight is the project, that combines all of my projects into 1 system. It is an organization of services.</p>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div id="contact" class="panel about">
+        <div class="mdblock">
+            <h1>Contact</h1>
+            <h2>Feel free to contact me about whatever!</h2>
+            <form class='contact'>
+                <input type="email" placeholder="Your email">
+                <textarea type="text" placeholder="Message"></textarea>
+                <button class="hidden" type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+    <hr>
+    <div class="panel account">
+        <div class="mdblock">
+            <h1>It all starts with a Midelight account</h1>
+			<a href="register"><button>Register</button></a><a href="login"><button>Login</button></a>        </div>
+    </div>
+    <hr>
+    <quote>Imperfections make the world perfect.<br>💖by Hypenexy</quote>
+    <!-- <svg height="400" width="100%">
+        <path d="M -10 80 C 40 60, 65 100, 400 80 S 150 150, 1940 80" stroke="#fff" fill="transparent"/>
+    </svg> -->
+    <script>
+        var contactform = document.getElementsByClassName("contact")[0];
+        var emailEl = contactform.children[0];
+        var messageEl = contactform.children[1];
+        var submitBtn = contactform.children[2];
+        messageEl.addEventListener("input", function(){
+            // if(emailEl.value.length != 0){
+                if(submitBtn.classList[0]=="hidden"){
+                    submitBtn.classList.remove("hidden")
+                }
+                else{
+                    if(messageEl.value.length == 0){
+                        submitBtn.classList.add("hidden")
+                    }
+                }
+            // }
+        })
+        contactform.addEventListener("submit", function(e){
+            e.preventDefault();
+
+            var email = emailEl.value;
+            var subject = messageEl.value;
+
+            var http = new XMLHttpRequest();
+            var url = 'contact/';
+            var params = 'email='+email+'&subject='+subject;
+            http.open('POST', url, true);
+
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.onreadystatechange = function(){
+                if(http.readyState == 4 && http.status == 200) {
+                    if(http.responseText=="success"){
+                        //success
+                    }
+                }
+            }
+            http.send(params);
+        })
+    </script>
+</body>
+</html>

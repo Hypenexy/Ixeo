@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>text</title>
+    <style>
+        body{
+            background-image: url("white_sand.png");
+        }
+        h1{
+            display: inline-block;
+            margin:0;
+            padding: 12px;
+            font-family: 'Roboto';
+            font-size: 84px;
+            font-weight: 400;
+        }
+        op {
+            background: linear-gradient(117deg, #65baff 0%, #d0bbff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+        op{
+            background: initial;
+            -webkit-text-stroke-width: 1.5px;
+            -webkit-text-stroke-color: #111;
+        }
+        h1::selection{
+            background: #55555555;
+            -webkit-text-fill-color: initial
+        }
+    </style>
+</head>
+<body>
+    <h1><op>Hey there</op>.</h1>
+    <h1>Hey there.</h1>
+    <h1>H<op>ey there.</op></h1>
+</body>
+</html>
