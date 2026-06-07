@@ -8,7 +8,7 @@ use std::env;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Load the .env file in development
-    dotenv().ok(); 
+    dotenv().ok();
 
     let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
     let redis_client = redis::Client::open(redis_url)?;
