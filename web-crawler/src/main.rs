@@ -4,6 +4,7 @@ use scraper::{Html, Selector};
 use url::Url;
 use dotenvy::dotenv;
 use std::env;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use sqlx::postgres::PgPoolOptions;
 use redis::AsyncCommands;
 
@@ -19,6 +20,7 @@ async fn main() -> anyhow::Result<()> {
     // Initialize Clients
     println!("Initializing little evil Spider Node...");
     let http_client = Client::builder()
+        .timeout(Duration::from_secs(5))
         .user_agent("IxeoCrawler/1.0 (+https://ixeo.midelight.net/)")
         .build()?;
 
@@ -69,12 +71,12 @@ async fn main() -> anyhow::Result<()> {
                 // 4. THE POLITENESS DELAY
                 // Never hit servers instantly back-to-back. 
                 // A 500ms delay ensures we are a "good bot".
-                tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+                tokio::time::sleep(Duration::from_millis(500)).await;
             }
             None => {
                 // If the queue is entirely empty, wait 5 seconds before checking again
                 println!("URL Frontier is empty! Waiting for new links...");
-                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                tokio::time::sleep(Duration::from_secs(5)).await;
             }
         }
     }
@@ -87,6 +89,26 @@ async fn fetch_and_parse(
     target_url: &str
 ) -> Result<()> {
     println!("Fetching: {}", target_url);
+
+    let parsed_url = Url::parse(target_url)?;
+    let host = parsed_url
+        .host_str()
+        .ok_or_else(|| anyhow::anyhow!("URL missing host: {}", target_url))?;
+
+    let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+    let last_seen: Option<u64> = redis_conn.hget("domain_last_visited", host).await?;
+
+    if let Some(previous_timestamp) = last_seen {
+        let elapsed = now.saturating_sub(previous_timestamp);
+        if elapsed < 2 {
+            let wait_secs = 2 - elapsed;
+            let wait_duration = Duration::from_secs(wait_secs);
+            println!("Politeness delay for {}: waiting {:?}", host, wait_duration);
+            tokio::time::sleep(wait_duration).await;
+        }
+    }
+
+    let _ : () = redis_conn.hset("domain_last_visited", host, now).await?;
     let response = client.get(target_url).send().await?;
     
     if response.status().is_success() {
