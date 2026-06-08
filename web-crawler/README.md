@@ -2,6 +2,8 @@
 ## Web Crawler  
 ### Crawl them public pages
 
+![Proxmox, hypervisors' view of 5 Ixeo Webcrawlers running at the same time](./web-crawler/proxmox_preview.png)
+
 This crawler runs on Rust. 
 It runs fast because there is concurency.
 
