@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.102"
+axum = "0.8.9"
+dotenvy = "0.15.7"
+serde = "1.0.228"
+serde_json = "1.0.150"
+tantivy = "0.26.1"
+tokio = "1.52.3"
+tower-http = "0.6.11"
