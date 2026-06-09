@@ -1,5 +1,5 @@
 # Ixeo
-### Search the web (small part of it) here  
+### Search the web here:
 ### https://ixeo.midelight.net  
   
 My attempt at the fastest search engine you have ever tried.  
