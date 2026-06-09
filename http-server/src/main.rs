@@ -37,7 +37,7 @@ struct SearchResult {
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
 
-    let index_path = Path::new("./tantivy_index");
+    let index_path = Path::new("../tantivy_index");
     
     // Open the index created by our indexer process
     let index = Index::open_in_dir(index_path)

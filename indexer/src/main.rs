@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let body_field = schema_builder.add_text_field("body", TEXT | STORED);
     let schema = schema_builder.build();
 
-    let index_path = Path::new("./tantivy_index");
+    let index_path = Path::new("../tantivy_index");
     std::fs::create_dir_all(index_path)?;
 
     let index = match Index::open_in_dir(index_path) {
