@@ -24,6 +24,7 @@ struct AppState {
 #[derive(Deserialize)]
 struct SearchParams {
     q: Option<String>,
+    p: Option<usize>,
 }
 
 #[derive(Serialize)]
@@ -74,6 +75,10 @@ async fn handle_search(
         _ => return (StatusCode::BAD_REQUEST, "Missing query parameter 'q'").into_response(),
     };
 
+    let page = params.p.unwrap_or(1).max(1);
+    let results_per_page = 20; 
+    let offset = (page - 1) * results_per_page;
+
     // Get handle fields from the instantiated schema
     let title_field = state.schema.get_field("title").unwrap();
     let body_field = state.schema.get_field("body").unwrap();
@@ -89,12 +94,14 @@ async fn handle_search(
 
     let searcher = state.reader.searcher();
     
-    // Execute search tracking top 20 relevant results using .order_by_score()
-    let top_docs = match searcher.search(&query, &TopDocs::with_limit(20).order_by_score()) {
+    // Execute search tracking top 20 relevant results using .order_by_score() with pages now
+    let top_docs = match searcher.search(
+        &query, 
+        &TopDocs::with_limit(results_per_page).and_offset(offset).order_by_score()
+    ) {
         Ok(docs) => docs,
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     };
-
     let mut results = Vec::new();
 
     for (score, doc_address) in top_docs {
