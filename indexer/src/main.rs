@@ -6,7 +6,7 @@ use std::env;
 use std::path::Path;
 use std::time::Duration;
 use tantivy::schema::*;
-use tantivy::{doc, Index, IndexWriter};
+use tantivy::{doc, Index};
 
 // Define a struct to map our Postgres database rows at runtime
 #[derive(sqlx::FromRow)]

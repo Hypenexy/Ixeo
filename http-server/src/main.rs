@@ -10,7 +10,7 @@ use std::path::Path;
 use std::sync::Arc;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
-use tantivy::schema::Schema;
+use tantivy::schema::{Schema, Value}; // <-- Explicitly imported the Value trait here
 use tantivy::{Index, IndexReader, TantivyDocument};
 use tower_http::cors::{Any, CorsLayer};
 
@@ -89,8 +89,8 @@ async fn handle_search(
 
     let searcher = state.reader.searcher();
     
-    // Execute search tracking top 20 relevant results
-    let top_docs = match searcher.search(&query, &TopDocs::with_limit(20)) {
+    // Execute search tracking top 20 relevant results using .order_by_score()
+    let top_docs = match searcher.search(&query, &TopDocs::with_limit(20).order_by_score()) {
         Ok(docs) => docs,
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     };
@@ -99,6 +99,7 @@ async fn handle_search(
 
     for (score, doc_address) in top_docs {
         if let Ok(retrieved_doc) = searcher.doc::<TantivyDocument>(doc_address) {
+            // Using the Value trait's .as_str() method
             let url = retrieved_doc.get_first(url_field).and_then(|v| v.as_str()).unwrap_or_default().to_string();
             let title = retrieved_doc.get_first(title_field).and_then(|v| v.as_str()).unwrap_or_default().to_string();
             
