@@ -24,6 +24,8 @@ I recommend running the system on separate containers, but you can possibly run 
 Debian 12 is perfect.  
 You need Rust  
 A postgres database  
+I recommend at least 10 gb at MINIMUM for a working example, as your database grows you might need a lot more than that.
+
   
     installation instructions
 
@@ -100,10 +102,12 @@ systemctl daemon-reload
 ```bash
 systemctl enable ixeo-server.service
 systemctl enable ixeo-indexer.service
+systemctl enable ixeo-crawler.service
 ```
 ```bash
 systemctl start ixeo-server.service
 systemctl start ixeo-indexer.service
+systemctl start ixeo-crawler.service
 ```
 
 To check the status of the services:
