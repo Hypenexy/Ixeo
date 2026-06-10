@@ -10,12 +10,16 @@ const resultsList = document.getElementById('resultsList');
 document.title = `${search} - Ixeo`
 searchInput.value = search;
 
-async() => {
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+;(async () => {
+    if (!search) {
+        return;
+    }
+
+    const response = await fetch(`/api/search?q=${encodeURIComponent(search)}`);
     const results = await response.json();
 
     // Display results
-    for(i = 0; i < results.length; i++) {
+    for (let i = 0; i < results.length; i++) {
         const result = results[i];
         const listItem = document.createElement('li');
         const link = document.createElement('a');
@@ -24,4 +28,4 @@ async() => {
         listItem.appendChild(link);
         resultsList.appendChild(listItem);
     }
-}
+})();
