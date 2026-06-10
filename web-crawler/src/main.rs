@@ -71,7 +71,7 @@ async fn main() -> anyhow::Result<()> {
                 // 4. THE POLITENESS DELAY
                 // Never hit servers instantly back-to-back. 
                 // A 500ms delay ensures we are a "good bot".
-                tokio::time::sleep(Duration::from_millis(500)).await;
+                tokio::time::sleep(Duration::from_millis(200)).await;
             }
             None => {
                 // If the queue is entirely empty, wait 5 seconds before checking again
@@ -146,7 +146,9 @@ async fn fetch_and_parse(
 
         for element in document.select(&link_selector) {
             if let Some(href) = element.value().attr("href") {
-                if let Ok(absolute_url) = base_url.join(href) {
+                if let Ok(mut absolute_url) = base_url.join(href) {
+                    // Strip URL fragment (#...) to avoid duplicate queueing of the same page.
+                    absolute_url.set_fragment(None);
                     let clean_url = absolute_url.as_str().to_string();
                     
                     // PERFORMANCE TWEAK: 
