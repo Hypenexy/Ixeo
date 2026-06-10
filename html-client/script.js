@@ -10,8 +10,8 @@ const resultsList = document.getElementById('resultsList');
 document.title = `${search} - Ixeo`
 searchInput.value = search;
 
-;(async () => {
-    if (!search) {
+window.addEventListener('DOMContentLoaded', async () => {
+    if (!search || !resultsList) {
         return;
     }
 
@@ -28,4 +28,4 @@ searchInput.value = search;
         listItem.appendChild(link);
         resultsList.appendChild(listItem);
     }
-})();
+});
