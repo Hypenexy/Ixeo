@@ -1,0 +1,7 @@
+*{font-family:'Roboto',sans-serif}
+::-webkit-scrollbar{width:0px}
+body{margin:0;margin-top:25vh;text-align:center;height:105vh;-ms-overflow-style:none;scrollbar-width:none}
+a,p{font-size:84px;font-weight:400;background:linear-gradient(117deg,#65baff 0%,#d0bbff 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+input{width:370px}input,button{border:1px solid #bbb;padding:12px;font-size:16px;border-radius:99px 0 0 99px;outline:0}
+button{cursor:pointer;font-weight: 300;border-radius:0 99px 99px 0}input:focus,
+button:focus{border:1px solid #666}@media screen and (max-width: 620px){input{width:60%}}

@@ -1,10 +1,12 @@
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    response::IntoResponse,
+    response::{Html, IntoResponse},
     routing::get,
-    Json, Router,
+    Json,
+    Router,
 };
+use axum::http::header;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::sync::Arc;
@@ -13,6 +15,7 @@ use tantivy::query::QueryParser;
 use tantivy::schema::{Schema, Value}; // <-- Explicitly imported the Value trait here
 use tantivy::{Index, IndexReader, TantivyDocument};
 use tower_http::cors::{Any, CorsLayer};
+// use tower_http::services::ServeDir;
 
 // Shared state context for Axum threads
 struct AppState {
@@ -39,11 +42,11 @@ async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
 
     let index_path = Path::new("../tantivy_index");
-    
+
     // Open the index created by our indexer process
     let index = Index::open_in_dir(index_path)
         .expect("Failed to open Tantivy index. Is the indexer running and initialized?");
-    
+
     let reader = index.reader()?;
     let schema = index.schema();
 
@@ -55,13 +58,47 @@ async fn main() -> anyhow::Result<()> {
         .allow_methods(Any);
 
     let app = Router::new()
-        .route("/search", get(handle_search))
+        .route("/", get(|| async { 
+            Html(include_str!("../dist/index.html")) 
+        }))
+        .route("/search", get(|| async { 
+            Html(include_str!("../dist/search.html")) 
+        }))
+        .route("/script.js", get(|| async {
+            (
+                [
+                    (header::CONTENT_TYPE, "text/javascript"),
+                    (header::CACHE_CONTROL, "public, max-age=86400")
+                ], 
+                include_str!("../dist/script.js")
+            ) 
+        }))
+        .route("/style.css", get(|| async {
+            (
+                [
+                    (header::CONTENT_TYPE, "text/css"),
+                    (header::CACHE_CONTROL, "public, max-age=86400")
+                ], 
+                include_str!("../dist/style.css")
+            ) 
+        }))
+        .route("/search.css", get(|| async {
+            (
+                [
+                    (header::CONTENT_TYPE, "text/css"),
+                    (header::CACHE_CONTROL, "public, max-age=86400")
+                ], 
+                include_str!("../dist/search.css")
+            ) 
+        }))
+        .route("/api/search", get(handle_search))
+        // .fallback_service(ServeDir::new("dist"))
         .layer(cors)
         .with_state(shared_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
     println!("Search Engine HTTP Server running on http://localhost:3000");
-    
+
     axum::serve(listener, app).await?;
     Ok(())
 }
@@ -86,14 +123,14 @@ async fn handle_search(
 
     // Configure query parser to examine both headings/titles and paragraphs
     let query_parser = QueryParser::for_index(&state.index, vec![title_field, body_field]);
-    
+
     let query = match query_parser.parse_query(query_str) {
         Ok(q) => q,
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid search syntax").into_response(),
     };
 
     let searcher = state.reader.searcher();
-    
+
     // Execute search tracking top 20 relevant results using .order_by_score() with pages now
     let top_docs = match searcher.search(
         &query, 

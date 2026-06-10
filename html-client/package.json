@@ -1,0 +1,22 @@
+{
+  "name": "html-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:html": "html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true index.html -o ../http-server/dist/index.html",
+    "build:searchHtml": "html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true search.html -o ../http-server/dist/search.html",
+    "build:css": "cleancss -o ../http-server/dist/style.css style.css",
+    "build:searchCSS": "cleancss -o ../http-server/dist/search.css search.css",
+    "build:js": "terser script.js -c -m -o ../http-server/dist/script.js",
+    "build": "npm run build:html && npm run build:searchHtml && npm run build:css && npm run build:searchCSS && npm run build:js"
+  },
+  "keywords": [],
+  "author": "Murlev",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "clean-css-cli": "^5.6.3",
+    "html-minifier-terser": "^7.2.0"
+  }
+}
