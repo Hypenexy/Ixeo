@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ixeo API</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; line-height: 1.6; padding: 0 1rem; }
+      code { background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }
+      pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>Ixeo Metadata API</h1>
+    <p>This endpoint fetches metadata for a URL and caches it for 24 hours.</p>
+
+    <h2>Endpoint</h2>
+    <pre>GET /api/metadata?url=https://example.com</pre>
+
+    <h2>Example</h2>
+    <pre>curl "http://localhost:3000/api/metadata?url=https://example.com"</pre>
+
+    <h2>Response</h2>
+    <pre>{
+  "url": "https://example.com",
+  "title": "Example Domain",
+  "description": "Example description",
+  "image_url": null,
+  "content_type": "text/html; charset=utf-8",
+  "fetched_at": "2026-07-11T00:00:00Z",
+  "expires_at": "2026-07-12T00:00:00Z"
+}</pre>
+
+    <h2>Notes</h2>
+    <ul>
+      <li>The API validates that the URL is well formed.</li>
+      <li>Fresh results are reused from the database for 24 hours.</li>
+      <li>Expired entries are refreshed automatically on the next request.</li>
+    </ul>
+  </body>
+</html>

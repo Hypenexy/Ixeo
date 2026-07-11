@@ -6,10 +6,11 @@
   "scripts": {
     "build:html": "html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true index.html -o ../http-server/dist/index.html",
     "build:searchHtml": "html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true search.html -o ../http-server/dist/search.html",
+    "build:api_docs": "html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true index.html -o ../http-server/dist/api_docs.html",
     "build:css": "cleancss -o ../http-server/dist/style.css style.css",
     "build:searchCSS": "cleancss -o ../http-server/dist/search.css search.css",
     "build:js": "terser script.js -c -m -o ../http-server/dist/script.js",
-    "build": "npm run build:html && npm run build:searchHtml && npm run build:css && npm run build:searchCSS && npm run build:js"
+    "build": "npm run build:html && npm run build:searchHtml && npm run build:api_docs && npm run build:css && npm run build:searchCSS && npm run build:js"
   },
   "keywords": [],
   "author": "Murlev",

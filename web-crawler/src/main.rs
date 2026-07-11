@@ -8,6 +8,41 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use sqlx::postgres::PgPoolOptions;
 use redis::AsyncCommands;
 
+const MAX_FRONTIER_SIZE: usize = 2_000;
+const VISITED_TTL_SECS: usize = 60 * 60 * 24;
+const DOMAIN_TTL_SECS: usize = 60 * 60 * 6;
+
+async fn mark_seen(redis_conn: &mut redis::aio::Connection, url: &str) -> Result<bool> {
+    let seen_key = format!("seen:{}", url);
+    let is_new: bool = redis_conn.set_nx(&seen_key, "1").await?;
+
+    if is_new {
+        let _: () = redis_conn.expire(&seen_key, VISITED_TTL_SECS).await?;
+    }
+
+    Ok(is_new)
+}
+
+async fn is_seen(redis_conn: &mut redis::aio::Connection, url: &str) -> Result<bool> {
+    let seen_key = format!("seen:{}", url);
+    let exists: bool = redis_conn.exists(&seen_key).await?;
+    Ok(exists)
+}
+
+async fn enqueue_url(redis_conn: &mut redis::aio::Connection, url: &str) -> Result<bool> {
+    let frontier_size: usize = redis_conn.scard("url_frontier").await?;
+    if frontier_size >= MAX_FRONTIER_SIZE {
+        return Ok(false);
+    }
+
+    let inserted: bool = redis_conn.sadd("url_frontier", url).await?;
+    if inserted {
+        let _: () = redis_conn.expire("url_frontier", 60 * 60 * 6).await?;
+    }
+
+    Ok(inserted)
+}
+
 // This macro initializes Tokio, giving us an async main function
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -53,8 +88,8 @@ async fn main() -> anyhow::Result<()> {
         match target_url {
             Some(url) => {
                 // 2. THE LOOP BREAKER
-                // Try to add it to 'visited_urls'. If it's already there, is_new will be false.
-                let is_new: bool = redis_conn.sadd("visited_urls", &url).await?;
+                // Try to mark this URL as seen. If it was already seen recently, is_new will be false.
+                let is_new = mark_seen(&mut redis_conn, &url).await?;
 
                 if !is_new {
                     println!("Skipping already visited: {}", url);
@@ -109,6 +144,7 @@ async fn fetch_and_parse(
     }
 
     let _ : () = redis_conn.hset("domain_last_visited", host, now).await?;
+    let _: () = redis_conn.expire("domain_last_visited", DOMAIN_TTL_SECS).await?;
     let response = client.get(target_url).send().await?;
     
     if response.status().is_success() {
@@ -151,14 +187,15 @@ async fn fetch_and_parse(
                     absolute_url.set_fragment(None);
                     let clean_url = absolute_url.as_str().to_string();
                     
-                    // PERFORMANCE TWEAK: 
-                    // Check if we've already visited this link BEFORE adding it to the queue.
-                    // SISMEMBER returns true if it exists in 'visited_urls'.
-                    let already_visited: bool = redis_conn.sismember("visited_urls", &clean_url).await?;
-                    
+                    // PERFORMANCE TWEAK:
+                    // Check if we've already seen this link recently before adding it to the queue.
+                    let already_visited = is_seen(&mut redis_conn, &clean_url).await?;
+
                     if !already_visited {
-                        let _ : () = redis_conn.sadd("url_frontier", clean_url).await?;
-                        new_links_count += 1;
+                        let inserted = enqueue_url(&mut redis_conn, &clean_url).await?;
+                        if inserted {
+                            new_links_count += 1;
+                        }
                     }
                 }
             }
