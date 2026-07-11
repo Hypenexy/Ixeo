@@ -239,12 +239,12 @@ async fn fetch_image_data(client: &Client, document: &Html, base_url: &Url) -> O
         return None;
     }
 
-    let bytes = response.bytes().await.ok()?;
     let content_type = response
         .headers()
         .get(CONTENT_TYPE)
         .and_then(|value| value.to_str().ok())
         .unwrap_or("application/octet-stream");
+    let bytes = response.bytes().await.ok()?;
 
     let encoded = general_purpose::STANDARD.encode(bytes);
     Some(format!("data:{};base64,{}", content_type, encoded))
