@@ -87,7 +87,9 @@ async fn main() -> anyhow::Result<()> {
         .connect(&db_url)
         .await?;
 
-    run_database_migrations(&db_pool).await?;
+    sqlx::migrate!("./migrations")
+        .run(&db_pool)
+        .await?;
 
     let http_client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
@@ -155,23 +157,6 @@ async fn main() -> anyhow::Result<()> {
 
     axum::serve(listener, app).await?;
     Ok(())
-}
-
-async fn run_database_migrations(pool: &PgPool) -> anyhow::Result<()> {
-    let migrator = sqlx::migrate!("./migrations");
-
-    match migrator.run(pool).await {
-        Ok(()) => Ok(()),
-        Err(err) if err.to_string().contains("previously applied but is missing in the resolved migrations") => {
-            eprintln!("Detected stale migration record; resetting migration state and retrying...");
-            sqlx::query("DELETE FROM _sqlx_migrations")
-                .execute(pool)
-                .await?;
-            migrator.run(pool).await?;
-            Ok(())
-        }
-        Err(err) => Err(err.into()),
-    }
 }
 
 async fn handle_search(
