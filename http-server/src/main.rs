@@ -178,8 +178,8 @@ async fn handle_search(
     let title_field = state.schema.get_field("title").unwrap();
     let body_field = state.schema.get_field("body").unwrap();
     let url_field = state.schema.get_field("url").unwrap();
-    let description_field = state.schema.get_field("description");
-    let image_data_field = state.schema.get_field("image_data");
+    let description_field = state.schema.get_field("description").ok();
+    let image_data_field = state.schema.get_field("image_data").ok();
 
     let mut query_fields = vec![title_field, body_field];
     if let Some(field) = description_field {
