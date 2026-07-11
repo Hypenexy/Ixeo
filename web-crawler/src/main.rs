@@ -9,8 +9,8 @@ use sqlx::postgres::PgPoolOptions;
 use redis::AsyncCommands;
 
 const MAX_FRONTIER_SIZE: usize = 2_000;
-const VISITED_TTL_SECS: usize = 60 * 60 * 24;
-const DOMAIN_TTL_SECS: usize = 60 * 60 * 6;
+const VISITED_TTL_SECS: i64 = 60 * 60 * 24;
+const DOMAIN_TTL_SECS: i64 = 60 * 60 * 6;
 
 async fn mark_seen(redis_conn: &mut redis::aio::Connection, url: &str) -> Result<bool> {
     let seen_key = format!("seen:{}", url);
@@ -189,10 +189,10 @@ async fn fetch_and_parse(
                     
                     // PERFORMANCE TWEAK:
                     // Check if we've already seen this link recently before adding it to the queue.
-                    let already_visited = is_seen(&mut redis_conn, &clean_url).await?;
+                    let already_visited = is_seen(&mut *redis_conn, &clean_url).await?;
 
                     if !already_visited {
-                        let inserted = enqueue_url(&mut redis_conn, &clean_url).await?;
+                        let inserted = enqueue_url(&mut *redis_conn, &clean_url).await?;
                         if inserted {
                             new_links_count += 1;
                         }

@@ -17,7 +17,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
-use tantivy::schema::Schema;
+use tantivy::schema::{Schema, Value};
 use tantivy::{Index, IndexReader, TantivyDocument};
 use tower_http::cors::{Any, CorsLayer};
 use url::Url;
