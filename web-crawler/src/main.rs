@@ -1,4 +1,6 @@
 use anyhow::Result;
+use base64::{engine::general_purpose, Engine as _};
+use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use url::Url;
@@ -149,7 +151,8 @@ async fn fetch_and_parse(
     
     if response.status().is_success() {
         let html_content = response.text().await?;
-        
+        let base_url = Url::parse(target_url)?;
+
         // 1. Parse the HTML
         let document = Html::parse_document(&html_content);
         
@@ -160,15 +163,20 @@ async fn fetch_and_parse(
             .map(|t| t.inner_html())
             .unwrap_or_else(|| "No Title".to_string());
 
+        let description = find_meta_content(&document, &["description", "og:description", "twitter:description"]);
+        let image_data = fetch_image_data(&client, &document, &base_url).await;
+
         println!("Found Page: {}", title);
 
         // 3. Save to PostgreSQL
-        // We use ON CONFLICT DO NOTHING so we don't crash if we crawl the same page twice
+        // We update existing rows so metadata can improve over time.
         sqlx::query(
-            "INSERT INTO raw_pages (url, title, html_content) VALUES ($1, $2, $3) ON CONFLICT (url) DO NOTHING"
+            "INSERT INTO raw_pages (url, title, description, image_data, html_content) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (url) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, image_data = EXCLUDED.image_data, html_content = EXCLUDED.html_content"
         )
         .bind(target_url)
         .bind(&title)
+        .bind(&description)
+        .bind(&image_data)
         .bind(&html_content)
         .execute(db)
         .await?;
@@ -204,4 +212,44 @@ async fn fetch_and_parse(
     }
 
     Ok(())
+}
+
+fn find_meta_content(document: &Html, names: &[&str]) -> Option<String> {
+    let meta_selector = Selector::parse("meta").unwrap();
+    for element in document.select(&meta_selector) {
+        if let Some(name) = element.value().attr("name").or_else(|| element.value().attr("property")) {
+            if names.iter().any(|expected| name.eq_ignore_ascii_case(expected)) {
+                if let Some(content) = element.value().attr("content") {
+                    let trimmed = content.trim();
+                    if !trimmed.is_empty() {
+                        return Some(trimmed.to_string());
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+async fn fetch_image_data(client: &Client, document: &Html, base_url: &Url) -> Option<String> {
+    let image_url = find_meta_content(document, &["og:image", "twitter:image", "image_src"])?;
+    let resolved_url = resolve_image_url(base_url, &image_url).ok()?;
+    let response = client.get(resolved_url).send().await.ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+
+    let bytes = response.bytes().await.ok()?;
+    let content_type = response
+        .headers()
+        .get(CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("application/octet-stream");
+
+    let encoded = general_purpose::STANDARD.encode(bytes);
+    Some(format!("data:{};base64,{}", content_type, encoded))
+}
+
+fn resolve_image_url(base_url: &Url, image_url: &str) -> Result<Url, url::ParseError> {
+    Url::parse(image_url).or_else(|_| base_url.join(image_url))
 }

@@ -14,6 +14,8 @@ struct RawPage {
     id: i32,
     url: String,
     title: Option<String>,
+    description: Option<String>,
+    image_data: Option<String>,
     html_content: Option<String>,
 }
 
@@ -25,6 +27,8 @@ async fn main() -> Result<()> {
     let mut schema_builder = Schema::builder();
     let url_field = schema_builder.add_text_field("url", TEXT | STORED);
     let title_field = schema_builder.add_text_field("title", TEXT | STORED);
+    let description_field = schema_builder.add_text_field("description", TEXT | STORED);
+    let image_data_field = schema_builder.add_text_field("image_data", STORED);
     let body_field = schema_builder.add_text_field("body", TEXT | STORED);
     let schema = schema_builder.build();
 
@@ -53,7 +57,7 @@ async fn main() -> Result<()> {
     loop {
         // Switched to query_as (Runtime check) instead of query_as! (Compile-time check)
         let rows = sqlx::query_as::<_, RawPage>(
-            "SELECT id, url, title, html_content FROM raw_pages WHERE indexed = FALSE LIMIT 50"
+            "SELECT id, url, title, description, image_data, html_content FROM raw_pages WHERE indexed = FALSE LIMIT 50"
         )
         .fetch_all(&db_pool)
         .await?;
@@ -74,6 +78,8 @@ async fn main() -> Result<()> {
             index_writer.add_document(doc!(
                 url_field => page_url,
                 title_field => page_title,
+                description_field => row.description.clone().unwrap_or_default(),
+                image_data_field => row.image_data.clone().unwrap_or_default(),
                 body_field => clean_body
             ))?;
 

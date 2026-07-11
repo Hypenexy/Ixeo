@@ -43,6 +43,8 @@ struct SearchParams {
 struct SearchResult {
     url: String,
     title: String,
+    description: Option<String>,
+    image_data: Option<String>,
     score: f32,
 }
 
@@ -176,9 +178,15 @@ async fn handle_search(
     let title_field = state.schema.get_field("title").unwrap();
     let body_field = state.schema.get_field("body").unwrap();
     let url_field = state.schema.get_field("url").unwrap();
+    let description_field = state.schema.get_field("description");
+    let image_data_field = state.schema.get_field("image_data");
 
-    // Configure query parser to examine both headings/titles and paragraphs
-    let query_parser = QueryParser::for_index(&state.index, vec![title_field, body_field]);
+    let mut query_fields = vec![title_field, body_field];
+    if let Some(field) = description_field {
+        query_fields.push(field);
+    }
+
+    let query_parser = QueryParser::for_index(&state.index, query_fields);
 
     let query = match query_parser.parse_query(query_str) {
         Ok(q) => q,
@@ -202,8 +210,16 @@ async fn handle_search(
             // Using the Value trait's .as_str() method
             let url = retrieved_doc.get_first(url_field).and_then(|v| v.as_str()).unwrap_or_default().to_string();
             let title = retrieved_doc.get_first(title_field).and_then(|v| v.as_str()).unwrap_or_default().to_string();
-            
-            results.push(SearchResult { url, title, score });
+            let description = description_field
+                .and_then(|field| retrieved_doc.get_first(field))
+                .and_then(|v| v.as_str())
+                .map(str::to_string);
+            let image_data = image_data_field
+                .and_then(|field| retrieved_doc.get_first(field))
+                .and_then(|v| v.as_str())
+                .map(str::to_string);
+
+            results.push(SearchResult { url, title, description, image_data, score });
         }
     }
 

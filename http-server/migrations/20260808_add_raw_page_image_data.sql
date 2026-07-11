@@ -1,0 +1,2 @@
+ALTER TABLE raw_pages ADD COLUMN IF NOT EXISTS image_data TEXT;
+ALTER TABLE raw_pages DROP COLUMN IF EXISTS tags;

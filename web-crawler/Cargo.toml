@@ -16,6 +16,9 @@ scraper = "0.18"
 # URL parsing and normalization (handling relative links)
 url = "2.5"
 
+# Image base64 encoding for storing inline image data
+base64 = "0.21"
+
 # Connecting to Redis (for our URL Frontier/Queue)
 redis = { version = "0.24", features = ["tokio-comp"] }
 

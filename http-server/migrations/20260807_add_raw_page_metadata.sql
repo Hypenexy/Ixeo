@@ -1,0 +1,2 @@
+ALTER TABLE raw_pages ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE raw_pages ADD COLUMN IF NOT EXISTS image_data TEXT;

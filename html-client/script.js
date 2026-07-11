@@ -21,11 +21,25 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Display results
     for (let i = 0; i < results.length; i++) {
         const result = results[i];
-        const listItem = document.createElement('li');
+        const item = document.createElement('div');
         const link = document.createElement('a');
         link.href = result.url;
-        link.textContent = result.title;
-        listItem.appendChild(link);
-        resultsList.appendChild(listItem);
+        link.innerHTML = `<h1>${result.title}</h1>`;
+        item.appendChild(link);
+
+        if (result.image_data) {
+            const img = document.createElement('img');
+            img.src = result.image_data;
+            img.alt = result.title;
+            item.appendChild(img);
+        }
+
+        if (result.description) {
+            const description = document.createElement('p');
+            description.textContent = result.description;
+            item.appendChild(description);
+        }
+
+        resultsList.appendChild(item);
     }
 });
