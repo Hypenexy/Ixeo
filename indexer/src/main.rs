@@ -23,22 +23,29 @@ struct RawPage {
 async fn main() -> Result<()> {
     dotenv().ok();
 
-    // 1. Initialize Tantivy Schema
-    let mut schema_builder = Schema::builder();
-    let url_field = schema_builder.add_text_field("url", TEXT | STORED);
-    let title_field = schema_builder.add_text_field("title", TEXT | STORED);
-    let description_field = schema_builder.add_text_field("description", TEXT | STORED);
-    let image_data_field = schema_builder.add_text_field("image_data", STORED);
-    let body_field = schema_builder.add_text_field("body", TEXT | STORED);
-    let schema = schema_builder.build();
-
+    // 1. Initialize Tantivy schema and open/create index
     let index_path = Path::new("../tantivy_index");
     std::fs::create_dir_all(index_path)?;
 
-    let index = match Index::open_in_dir(index_path) {
-        Ok(idx) => idx,
-        Err(_) => Index::create_in_dir(index_path, schema)?,
+    let index = if index_path.join("meta.json").exists() {
+        Index::open_in_dir(index_path)?
+    } else {
+        let mut schema_builder = Schema::builder();
+        schema_builder.add_text_field("url", TEXT | STORED);
+        schema_builder.add_text_field("title", TEXT | STORED);
+        schema_builder.add_text_field("description", TEXT | STORED);
+        schema_builder.add_text_field("image_data", STORED);
+        schema_builder.add_text_field("body", TEXT | STORED);
+        let schema = schema_builder.build();
+        Index::create_in_dir(index_path, schema)?
     };
+    let schema = index.schema();
+
+    let url_field = schema.get_field("url").expect("Index schema missing field: url");
+    let title_field = schema.get_field("title").expect("Index schema missing field: title");
+    let description_field = schema.get_field("description").expect("Index schema missing field: description");
+    let image_data_field = schema.get_field("image_data").expect("Index schema missing field: image_data");
+    let body_field = schema.get_field("body").expect("Index schema missing field: body");
 
     let mut index_writer = index.writer(50_000_000)?;
 
