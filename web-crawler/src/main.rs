@@ -243,7 +243,8 @@ async fn fetch_image_data(client: &Client, document: &Html, base_url: &Url) -> O
         .headers()
         .get(CONTENT_TYPE)
         .and_then(|value| value.to_str().ok())
-        .unwrap_or("application/octet-stream");
+        .map(|value| value.to_string())
+        .unwrap_or_else(|| "application/octet-stream".to_string());
     let bytes = response.bytes().await.ok()?;
 
     let encoded = general_purpose::STANDARD.encode(bytes);
