@@ -10,7 +10,10 @@
     "build:css": "cleancss -o ../http-server/dist/style.css style.css",
     "build:searchCSS": "cleancss -o ../http-server/dist/search.css search.css",
     "build:js": "terser script.js -c -m -o ../http-server/dist/script.js",
-    "build": "npm run build:html && npm run build:searchHtml && npm run build:api_docs && npm run build:css && npm run build:searchCSS && npm run build:js"
+    "build:adminHtml": "html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true admin.html -o ../http-server/dist/admin.html",
+    "build:adminCSS": "cleancss -o ../http-server/dist/admin.css admin.css",
+    "build:adminJS": "terser admin.js -c -m -o ../http-server/dist/admin.js",
+    "build": "npm run build:html && npm run build:searchHtml && npm run build:api_docs && npm run build:css && npm run build:searchCSS && npm run build:js && npm run build:adminHtml && npm run build:adminCSS && npm run build:adminJS"
   },
   "keywords": [],
   "author": "Murlev",

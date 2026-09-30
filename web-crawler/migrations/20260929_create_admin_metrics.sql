@@ -1,0 +1,6 @@
+ALTER TABLE raw_pages ADD COLUMN IF NOT EXISTS indexed BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS search_hourly_metrics (
+    hour_bucket TIMESTAMPTZ PRIMARY KEY,
+    request_count BIGINT NOT NULL DEFAULT 0
+);

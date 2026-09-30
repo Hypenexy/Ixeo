@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Operations | Ixeo</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="rail">
+      <a class="wordmark" href="/" aria-label="Ixeo home">ixeo<span>.</span></a>
+      <div class="rail-caption">OPERATIONS</div>
+      <div class="rail-item active"><span class="rail-mark"></span>Overview</div>
+      <a class="rail-link" href="/search">Search</a>
+      <a class="rail-link" href="/api/index.html">API reference</a>
+      <div class="rail-bottom"><span class="live-dot"></span>Control room</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">IXEO / SYSTEMS</p>
+          <h1>Operations overview</h1>
+        </div>
+        <div class="top-actions">
+          <span id="updatedAt" class="updated-at">Waiting for connection</span>
+          <button id="refreshButton" class="button button-refresh" type="button" disabled>Refresh</button>
+          <button id="signOutButton" class="button button-quiet" type="button" hidden>Sign out</button>
+        </div>
+      </header>
+
+      <section id="loginPanel" class="login-panel" aria-labelledby="loginTitle">
+        <div class="login-copy">
+          <p class="eyebrow">RESTRICTED AREA</p>
+          <h2 id="loginTitle">Admin access</h2>
+          <p>Enter the dashboard token configured on the Ixeo server. It stays in this tab only.</p>
+        </div>
+        <form id="loginForm" class="login-form">
+          <label for="adminToken">Admin token</label>
+          <div class="token-entry">
+            <input id="adminToken" name="token" type="password" autocomplete="current-password" required>
+            <button class="button button-primary" type="submit">Connect</button>
+          </div>
+          <p id="loginError" class="form-error" role="status"></p>
+        </form>
+      </section>
+
+      <div id="dashboard" hidden>
+        <section class="status-strip" aria-label="Service status">
+          <div class="service-status">
+            <span id="crawlerDot" class="status-dot"></span>
+            <span class="service-name">Crawler</span>
+            <strong id="crawlerStatus">Unknown</strong>
+          </div>
+          <div class="service-detail">Last heartbeat <span id="crawlerHeartbeat">--</span></div>
+          <div class="service-detail">Frontier <strong id="frontierSize">--</strong></div>
+          <div class="service-detail">Redis crawled <strong id="crawlerTotal">--</strong></div>
+        </section>
+
+        <section class="metrics-grid" aria-label="Key metrics">
+          <article class="metric metric-pages">
+            <span class="metric-label">Pages stored</span>
+            <strong id="pagesTotal" class="metric-value">--</strong>
+            <span id="pagesLastDay" class="metric-foot">-- crawled in 24 hours</span>
+          </article>
+          <article class="metric metric-indexed">
+            <span class="metric-label">Search index</span>
+            <strong id="pagesIndexed" class="metric-value">--</strong>
+            <span id="pagesPending" class="metric-foot">-- waiting to index</span>
+          </article>
+          <article class="metric metric-cache">
+            <span class="metric-label">Metadata cache</span>
+            <strong id="cacheTotal" class="metric-value">--</strong>
+            <span id="cacheFresh" class="metric-foot">-- fresh entries</span>
+          </article>
+          <article class="metric metric-searches">
+            <span class="metric-label">Search requests</span>
+            <strong id="searchesTotal" class="metric-value">--</strong>
+            <span class="metric-foot">Successful searches · last 24 hours</span>
+          </article>
+        </section>
+
+        <section class="activity-grid">
+          <article class="panel traffic-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">SEARCH ENGINE</p><h2>Request volume</h2></div>
+              <span class="range-label">24 hours</span>
+            </div>
+            <div id="trafficChart" class="traffic-chart" role="img" aria-label="Hourly search requests over the last 24 hours"></div>
+            <div class="chart-axis"><span>24 hours ago</span><span>Now</span></div>
+            <div class="identity-note"><span class="note-mark">i</span><span>Search is anonymous. API tokens and distinct user identities are not configured, so user-level counts are unavailable.</span></div>
+          </article>
+          <article class="panel index-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">INDEX PIPELINE</p><h2>Collection health</h2></div>
+              <span class="index-mark">IX</span>
+            </div>
+            <div class="index-track"><span id="indexProgress"></span></div>
+            <div class="index-summary"><strong id="indexPercent">0%</strong><span>of stored pages indexed</span></div>
+            <dl class="pipeline-list">
+              <div><dt>Indexed</dt><dd id="pipelineIndexed">--</dd></div>
+              <div><dt>Pending</dt><dd id="pipelinePending">--</dd></div>
+              <div><dt>Queued URLs</dt><dd id="pipelineQueue">--</dd></div>
+            </dl>
+          </article>
+        </section>
+
+        <section class="panel data-panel">
+          <div class="panel-heading data-heading">
+            <div><p class="eyebrow">DATABASE</p><h2>Recent records</h2></div>
+            <div class="tabs" role="tablist" aria-label="Database records">
+              <button class="tab active" type="button" role="tab" aria-selected="true" data-table="pages">Crawled pages</button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-table="metadata">Metadata cache</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="recordHead"></thead>
+              <tbody id="recordRows"></tbody>
+            </table>
+          </div>
+          <div id="tableEmpty" class="table-empty" hidden>No records to show.</div>
+        </section>
+      </div>
+      <p id="dashboardError" class="dashboard-error" role="alert"></p>
+      <footer class="footer"><span>IXEO SYSTEMS</span><span id="dataSource">PostgreSQL · Redis</span></footer>
+    </main>
+  </div>
+  <script src="/admin.js" defer></script>
+</body>
+</html>

@@ -86,6 +86,10 @@ async fn main() -> anyhow::Result<()> {
         // 1. Pop a random URL from the frontier
         // SPOP removes it from 'url_frontier' and gives it to us
         let target_url: Option<String> = redis_conn.spop("url_frontier").await?;
+        let heartbeat = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        let _: () = redis_conn
+            .set_ex("ixeo:crawler:heartbeat", heartbeat, 120)
+            .await?;
 
         match target_url {
             Some(url) => {
@@ -101,8 +105,11 @@ async fn main() -> anyhow::Result<()> {
                 // 3. Crawl the URL
                 // We wrap this in a match/if-let so that if a single page fails (e.g. 404 error), 
                 // it doesn't crash our entire crawler. It just prints the error and moves on.
-                if let Err(e) = fetch_and_parse(&http_client, &db_pool, &mut redis_conn, &url).await {
-                    eprintln!("Error crawling {}: {}", url, e);
+                match fetch_and_parse(&http_client, &db_pool, &mut redis_conn, &url).await {
+                    Ok(()) => {
+                        let _: u64 = redis_conn.incr("ixeo:crawler:pages_crawled", 1).await?;
+                    }
+                    Err(e) => eprintln!("Error crawling {}: {}", url, e),
                 }
 
                 // 4. THE POLITENESS DELAY
@@ -171,7 +178,7 @@ async fn fetch_and_parse(
         // 3. Save to PostgreSQL
         // We update existing rows so metadata can improve over time.
         sqlx::query(
-            "INSERT INTO raw_pages (url, title, description, image_data, html_content) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (url) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, image_data = EXCLUDED.image_data, html_content = EXCLUDED.html_content"
+            "INSERT INTO raw_pages (url, title, description, image_data, html_content) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (url) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, image_data = EXCLUDED.image_data, html_content = EXCLUDED.html_content, crawled_at = NOW()"
         )
         .bind(target_url)
         .bind(&title)
